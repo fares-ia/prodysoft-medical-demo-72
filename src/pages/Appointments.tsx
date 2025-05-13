@@ -9,11 +9,12 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { addDays, format, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 // Mock data for appointments with added fields for enhanced functionality
 const mockAppointments = [
@@ -122,6 +123,7 @@ const statusOptions = ["Tous", "Confirmé", "En attente", "Annulé", "Terminé"]
 const purposeOptions = ["Tous", "Consultation générale", "Suivi", "Urgence", "Vaccination", "Renouvellement ordonnance"];
 
 const Appointments = () => {
+  const isMobile = useIsMobile();
   const [date, setDate] = useState<Date>(new Date());
   const [appointments, setAppointments] = useState(mockAppointments);
   const [view, setView] = useState<"day" | "week">("day");
@@ -130,6 +132,7 @@ const Appointments = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
+  const [showCalendarDrawer, setShowCalendarDrawer] = useState(false);
   
   // Calculate next 7 days for week view
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(date, i));
@@ -158,7 +161,7 @@ const Appointments = () => {
   const getAppointmentForTimeSlot = (time: string, day?: Date) => {
     const currentDay = day || date;
     return appointments.find(
-      appointment => appointment.time === time && 
+      app => app.time === time && 
       (!day || isSameDay(currentDay, date))
     );
   };
@@ -236,7 +239,7 @@ const Appointments = () => {
                           mode="single"
                           selected={date}
                           onSelect={(newDate) => newDate && setDate(newDate)}
-                          className="rounded-md border shadow pointer-events-auto"
+                          className="rounded-md border shadow"
                         />
                       </div>
                     </div>
@@ -301,85 +304,185 @@ const Appointments = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
-              </CardHeader>
-              <CardContent className="px-2 pb-4">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(newDate) => newDate && setDate(newDate)}
-                  className="rounded-md border mx-auto pointer-events-auto"
-                />
-              </CardContent>
-            </Card>
+          {/* Sidebar sur mobile - remplacé par un drawer */}
+          {isMobile ? (
+            <>
+              <div className="flex lg:hidden justify-between mb-2">
+                <Button variant="outline" className="w-full mr-2" onClick={() => setShowCalendarDrawer(true)}>
+                  <CalendarDays className="mr-2 h-4 w-4" /> Calendrier & Filtres
+                </Button>
+                <Button className="bg-[#0069D9]" onClick={handleSendReminders}>
+                  <CalendarClock className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <Drawer open={showCalendarDrawer} onOpenChange={setShowCalendarDrawer}>
+                <DrawerContent>
+                  <div className="max-w-md mx-auto py-4 px-4">
+                    <DrawerHeader>
+                      <DrawerTitle>Calendrier & Filtres</DrawerTitle>
+                    </DrawerHeader>
+                    <div className="space-y-4">
+                      <Card className="overflow-hidden">
+                        <CardHeader className="p-3">
+                          <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0 flex justify-center">
+                          <div className="w-full max-w-[320px]">
+                            <AspectRatio ratio={4/3} className="bg-white">
+                              <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={(newDate) => newDate && setDate(newDate)}
+                                className="mx-auto w-full"
+                              />
+                            </AspectRatio>
+                          </div>
+                        </CardContent>
+                      </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">Filtres</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Rechercher</label>
-                  <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Patient ou motif..." 
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg font-medium">Filtres</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Rechercher</label>
+                            <div className="relative">
+                              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                              <Input 
+                                placeholder="Patient ou motif..." 
+                                className="pl-8"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Statut</label>
+                            <select 
+                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              value={statusFilter}
+                              onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                              {statusOptions.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Motif</label>
+                            <select 
+                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              value={purposeFilter}
+                              onChange={(e) => setStatusPurpose(e.target.value)}
+                            >
+                              {purposeOptions.map(purpose => (
+                                <option key={purpose} value={purpose}>{purpose}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button className="w-full" variant="outline" onClick={() => {
+                            setSearchQuery("");
+                            setStatusFilter("Tous");
+                            setStatusPurpose("Tous");
+                          }}>
+                            Réinitialiser les filtres
+                          </Button>
+                          <Button className="w-full bg-[#0069D9]" onClick={() => {
+                            handleSendReminders();
+                            setShowCalendarDrawer(false);
+                          }}>
+                            <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Statut</label>
-                  <select 
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    {statusOptions.map(status => (
-                      <option key={status} value={status}>{status}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Motif</label>
-                  <select 
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={purposeFilter}
-                    onChange={(e) => setStatusPurpose(e.target.value)}
-                  >
-                    {purposeOptions.map(purpose => (
-                      <option key={purpose} value={purpose}>{purpose}</option>
-                    ))}
-                  </select>
-                </div>
-                <Button className="w-full" variant="outline" onClick={() => {
-                  setSearchQuery("");
-                  setStatusFilter("Tous");
-                  setStatusPurpose("Tous");
-                }}>
-                  Réinitialiser les filtres
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-medium">Actions rapides</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full bg-[#0069D9]" onClick={handleSendReminders}>
-                  <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+                </DrawerContent>
+              </Drawer>
+            </>
+          ) : (
+            <div className="lg:col-span-1 space-y-6 hidden lg:block">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
+                </CardHeader>
+                <CardContent className="px-2 pb-4">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(newDate) => newDate && setDate(newDate)}
+                    className="rounded-md border mx-auto"
+                  />
+                </CardContent>
+              </Card>
 
-          <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Filtres</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Rechercher</label>
+                    <div className="relative">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Patient ou motif..." 
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Statut</label>
+                    <select 
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      {statusOptions.map(status => (
+                        <option key={status} value={status}>{status}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Motif</label>
+                    <select 
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={purposeFilter}
+                      onChange={(e) => setStatusPurpose(e.target.value)}
+                    >
+                      {purposeOptions.map(purpose => (
+                        <option key={purpose} value={purpose}>{purpose}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button className="w-full" variant="outline" onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("Tous");
+                    setStatusPurpose("Tous");
+                  }}>
+                    Réinitialiser les filtres
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Actions rapides</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button className="w-full bg-[#0069D9]" onClick={handleSendReminders}>
+                    <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div className="lg:col-span-3 col-span-1">
             <Tabs defaultValue="day" className="mb-4">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
                 <TabsList>
@@ -390,7 +493,7 @@ const Appointments = () => {
                     <CalendarDays className="h-4 w-4 mr-1" /> Semaine
                   </TabsTrigger>
                 </TabsList>
-                <div className="text-lg font-medium">
+                <div className="text-lg font-medium truncate">
                   {view === "day" 
                     ? format(date, "EEEE dd MMMM yyyy", { locale: fr }) 
                     : `${format(weekDays[0], "dd")} - ${format(weekDays[6], "dd")} ${format(weekDays[0], "MMMM yyyy", { locale: fr })}`}
@@ -441,13 +544,11 @@ const Appointments = () => {
                                   </Button>
                                 </DrawerTrigger>
                                 <DrawerContent>
-                                  {/* Réutiliser le même contenu du drawer de création */}
                                   <div className="max-w-md mx-auto py-4 px-6">
                                     <DrawerHeader>
                                       <DrawerTitle>Ajouter un rendez-vous à {time}</DrawerTitle>
                                     </DrawerHeader>
                                     <form className="space-y-4 mt-4">
-                                      {/* ... formulaire identique ... */}
                                       <div className="space-y-2">
                                         <label htmlFor="patient" className="text-sm font-medium">Patient</label>
                                         <select id="patient" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
@@ -611,9 +712,10 @@ const Appointments = () => {
                   </div>
                 </div>
                 
-                <div className="flex justify-end gap-2 pt-4">
+                <div className="flex flex-wrap justify-end gap-2 pt-4">
                   <Button 
                     variant="destructive" 
+                    className="w-full sm:w-auto" 
                     onClick={() => {
                       toast({
                         title: "Rendez-vous annulé",
@@ -626,6 +728,7 @@ const Appointments = () => {
                   </Button>
                   <Button 
                     variant="outline"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       toast({
                         title: "SMS envoyé",
@@ -636,9 +739,8 @@ const Appointments = () => {
                     Envoyer rappel
                   </Button>
                   <Button 
-                    className="bg-[#0069D9]"
+                    className="bg-[#0069D9] w-full sm:w-auto"
                     onClick={() => {
-                      // Ici on pourrait ouvrir un nouveau drawer pour modifier le RDV
                       toast({
                         title: "Modification",
                         description: "Fonctionnalité de modification de rendez-vous.",
