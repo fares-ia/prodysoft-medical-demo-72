@@ -1,11 +1,15 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Plus, Clock, Printer, Download, Filter, Search, CalendarDays, CalendarClock } from "lucide-react";
+import { 
+  Plus, Clock, Printer, Download, Filter, Search, CalendarDays, 
+  CalendarClock, ArrowLeft, ArrowRight, ChevronDown, List, Grid
+} from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { addDays, format, isSameDay } from "date-fns";
+import { addDays, format, isSameDay, subDays, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -126,15 +130,23 @@ const Appointments = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [appointments, setAppointments] = useState(mockAppointments);
   const [view, setView] = useState<"day" | "week">("day");
+  const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [statusFilter, setStatusFilter] = useState("Tous");
   const [purposeFilter, setStatusPurpose] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
-  const [showCalendarDrawer, setShowCalendarDrawer] = useState(false);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
   
   // Calculate next 7 days for week view
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(date, i));
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(date, { weekStartsOn: 1 }), i));
+
+  // Navigate through dates
+  const goToNextDay = () => setDate(addDays(date, 1));
+  const goToPrevDay = () => setDate(subDays(date, 1));
+  const goToToday = () => setDate(new Date());
+  const goToNextWeek = () => setDate(addDays(date, 7));
+  const goToPrevWeek = () => setDate(subDays(date, 7));
 
   // Filter appointments based on filters and search
   const filteredAppointments = appointments.filter(appointment => {
@@ -193,23 +205,51 @@ const Appointments = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header section with title and action buttons */}
+      <div className="container mx-auto py-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Rendez-vous</h1>
             <p className="text-gray-500">Gérez votre agenda et vos rendez-vous</p>
           </div>
-          <div className="flex flex-wrap gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="h-4 w-4 mr-1" /> Imprimer
+          
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            <div className="relative flex-grow md:flex-grow-0">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input 
+                placeholder="Rechercher..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
+            
+            <Button variant="outline" size="icon">
+              {displayMode === "list" ? (
+                <Grid className="h-4 w-4" onClick={() => setDisplayMode("grid")} />
+              ) : (
+                <List className="h-4 w-4" onClick={() => setDisplayMode("list")} />
+              )}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-1" /> Exporter
+            
+            {isMobile && (
+              <Button variant="outline" size="icon" onClick={() => setShowFilterDrawer(true)}>
+                <Filter className="h-4 w-4" />
+              </Button>
+            )}
+            
+            <Button variant="outline" size="icon" onClick={handlePrint}>
+              <Printer className="h-4 w-4" />
             </Button>
+            
+            <Button variant="outline" size="icon" onClick={handleExport}>
+              <Download className="h-4 w-4" />
+            </Button>
+            
             <Drawer>
               <DrawerTrigger asChild>
                 <Button className="bg-[#0069D9]">
-                  <Plus className="mr-2 h-4 w-4" /> Nouveau rendez-vous
+                  <Plus className="mr-2 h-4 w-4" /> Nouveau
                 </Button>
               </DrawerTrigger>
               <DrawerContent>
@@ -234,14 +274,12 @@ const Appointments = () => {
                     <div className="space-y-2">
                       <label htmlFor="date" className="text-sm font-medium">Date</label>
                       <div className="flex justify-center">
-                        <div className="w-full max-w-[300px]">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={(newDate) => newDate && setDate(newDate)}
-                            className="border rounded-md"
-                          />
-                        </div>
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={(newDate) => newDate && setDate(newDate)}
+                          className="border rounded-md pointer-events-auto"
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -303,139 +341,43 @@ const Appointments = () => {
             </Drawer>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar sur mobile - remplacé par un drawer */}
-          {isMobile ? (
-            <>
-              <div className="flex lg:hidden justify-between mb-2">
-                <Button variant="outline" className="w-full mr-2" onClick={() => setShowCalendarDrawer(true)}>
-                  <CalendarDays className="mr-2 h-4 w-4" /> Calendrier & Filtres
-                </Button>
-                <Button className="bg-[#0069D9]" onClick={handleSendReminders}>
-                  <CalendarClock className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <Drawer open={showCalendarDrawer} onOpenChange={setShowCalendarDrawer}>
-                <DrawerContent>
-                  <div className="max-w-md mx-auto py-4 px-4">
-                    <DrawerHeader>
-                      <DrawerTitle>Calendrier & Filtres</DrawerTitle>
-                    </DrawerHeader>
-                    <div className="space-y-4">
-                      <Card className="overflow-hidden">
-                        <CardHeader className="p-3">
-                          <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-3 flex justify-center relative">
-                          <div className="w-full max-w-[280px] relative z-10">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={(newDate) => newDate && setDate(newDate)}
-                              className="mx-auto border rounded-md"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg font-medium">Filtres</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Rechercher</label>
-                            <div className="relative">
-                              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                              <Input 
-                                placeholder="Patient ou motif..." 
-                                className="pl-8"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Statut</label>
-                            <select 
-                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                              value={statusFilter}
-                              onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                              {statusOptions.map(status => (
-                                <option key={status} value={status}>{status}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Motif</label>
-                            <select 
-                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                              value={purposeFilter}
-                              onChange={(e) => setStatusPurpose(e.target.value)}
-                            >
-                              {purposeOptions.map(purpose => (
-                                <option key={purpose} value={purpose}>{purpose}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <Button className="w-full" variant="outline" onClick={() => {
-                            setSearchQuery("");
-                            setStatusFilter("Tous");
-                            setStatusPurpose("Tous");
-                          }}>
-                            Réinitialiser les filtres
-                          </Button>
-                          <Button className="w-full bg-[#0069D9]" onClick={() => {
-                            handleSendReminders();
-                            setShowCalendarDrawer(false);
-                          }}>
-                            <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            </>
-          ) : (
-            <div className="lg:col-span-1 space-y-6 hidden lg:block">
+        
+        {/* Main content area */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* Sidebar - Filters & Calendar */}
+          <div className={`${isMobile ? "hidden" : "col-span-12 md:col-span-3"}`}>
+            <div className="space-y-6">
+              {/* Calendar component */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-4 flex justify-center relative">
-                  <div className="w-full max-w-[280px] relative z-10">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={(newDate) => newDate && setDate(newDate)}
-                      className="mx-auto border rounded-md"
-                    />
+                <CardContent className="px-3 pb-4">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(newDate) => newDate && setDate(newDate)}
+                    className="mx-auto border rounded-md pointer-events-auto"
+                  />
+                  <div className="flex justify-between items-center mt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={goToToday}
+                    >
+                      Aujourd'hui
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-
+              
+              {/* Filters */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Filtres</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Rechercher</label>
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Patient ou motif..." 
-                        className="pl-8"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                  </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Statut</label>
                     <select 
@@ -465,13 +407,14 @@ const Appointments = () => {
                     setStatusFilter("Tous");
                     setStatusPurpose("Tous");
                   }}>
-                    Réinitialiser les filtres
+                    Réinitialiser
                   </Button>
                 </CardContent>
               </Card>
               
+              {/* Actions rapides */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Actions rapides</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -481,126 +424,260 @@ const Appointments = () => {
                 </CardContent>
               </Card>
             </div>
-          )}
-
-          <div className="lg:col-span-3 col-span-1">
-            <Tabs defaultValue="day" className="mb-4">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-2">
-                <TabsList>
-                  <TabsTrigger value="day" onClick={() => setView("day")}>
-                    <Calendar className="h-4 w-4 mr-1" /> Jour
-                  </TabsTrigger>
-                  <TabsTrigger value="week" onClick={() => setView("week")}>
-                    <CalendarDays className="h-4 w-4 mr-1" /> Semaine
-                  </TabsTrigger>
-                </TabsList>
-                <div className="text-lg font-medium truncate">
-                  {view === "day" 
-                    ? format(date, "EEEE dd MMMM yyyy", { locale: fr }) 
-                    : `${format(weekDays[0], "dd")} - ${format(weekDays[6], "dd")} ${format(weekDays[0], "MMMM yyyy", { locale: fr })}`}
+          </div>
+          
+          {/* Main appointment view */}
+          <div className="col-span-12 md:col-span-9">
+            {/* Date navigation and view toggle */}
+            <Card className="mb-6">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div className="flex gap-2">
+                    {view === "day" ? (
+                      <>
+                        <Button variant="outline" size="icon" onClick={goToPrevDay}>
+                          <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={goToNextDay}>
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" size="icon" onClick={goToPrevWeek}>
+                          <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={goToNextWeek}>
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="outline" onClick={goToToday}>Aujourd'hui</Button>
+                  </div>
+                  
+                  <div className="text-lg font-medium truncate text-center">
+                    {view === "day" 
+                      ? format(date, "EEEE dd MMMM yyyy", { locale: fr }) 
+                      : `${format(weekDays[0], "dd")} - ${format(weekDays[6], "dd")} ${format(weekDays[0], "MMMM yyyy", { locale: fr })}`}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <TabsList>
+                      <TabsTrigger 
+                        value="day" 
+                        onClick={() => setView("day")}
+                        className={view === "day" ? "bg-[#0069D9] text-white" : ""}
+                      >
+                        <Calendar className="h-4 w-4 mr-1" /> Jour
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="week" 
+                        onClick={() => setView("week")}
+                        className={view === "week" ? "bg-[#0069D9] text-white" : ""}
+                      >
+                        <CalendarDays className="h-4 w-4 mr-1" /> Semaine
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
                 </div>
-              </div>
-
-              <TabsContent value="day" className="m-0">
-                <Card>
-                  <CardHeader className="bg-gray-50 border-b">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg font-medium">
-                        Rendez-vous du {format(date, "dd/MM/yyyy")}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="divide-y p-0">
-                    {timeSlots.map((time) => {
-                      const appointment = getAppointmentForTimeSlot(time);
-                      return (
-                        <div key={time} className={`flex p-2 ${appointment ? "bg-gray-50" : ""}`}>
-                          <div className="w-16 flex items-center justify-center font-medium text-gray-500">
-                            <Clock className="h-4 w-4 mr-1" /> {time}
-                          </div>
-                          {appointment ? (
-                            <div 
-                              className="flex-1 ml-4 p-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
-                              onClick={() => handleAppointmentClick(appointment)}
-                            >
-                              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                                <div>
-                                  <h4 className="font-medium">{appointment.patient}</h4>
-                                  <p className="text-sm text-gray-500">{appointment.purpose}</p>
-                                </div>
-                                <div className="flex items-center gap-2 mt-2 md:mt-0">
-                                  <span className="text-xs text-gray-500">{appointment.duration} min</span>
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                                    {appointment.status}
-                                  </span>
-                                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Appointment display */}
+            <Card>
+              <CardHeader className="bg-gray-50 border-b py-3 px-4">
+                <CardTitle className="text-lg font-medium flex justify-between items-center">
+                  <span>
+                    {view === "day" 
+                      ? `Rendez-vous du ${format(date, "dd/MM/yyyy")}`
+                      : `Rendez-vous de la semaine`}
+                  </span>
+                  <Badge variant="outline" className="ml-2">
+                    {filteredAppointments.length} RDV
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {view === "day" && (
+                  <>
+                    {/* List view */}
+                    {displayMode === "list" && (
+                      <div className="divide-y">
+                        {timeSlots.map((time) => {
+                          const appointment = getAppointmentForTimeSlot(time);
+                          return (
+                            <div key={time} className={`flex p-3 ${appointment ? "bg-gray-50" : ""}`}>
+                              <div className="w-16 flex items-center justify-center font-medium text-gray-500">
+                                <Clock className="h-4 w-4 mr-1" /> {time}
                               </div>
-                            </div>
-                          ) : (
-                            <div className="flex-1 ml-4 p-2 border border-dashed border-gray-200 rounded-md flex items-center justify-center bg-white">
-                              <Drawer>
-                                <DrawerTrigger asChild>
-                                  <Button variant="ghost" className="text-sm text-gray-400 hover:text-gray-700">
-                                    <Plus className="h-3 w-3 mr-1" /> Disponible
-                                  </Button>
-                                </DrawerTrigger>
-                                <DrawerContent>
-                                  <div className="max-w-md mx-auto py-4 px-6">
-                                    <DrawerHeader>
-                                      <DrawerTitle>Ajouter un rendez-vous à {time}</DrawerTitle>
-                                    </DrawerHeader>
-                                    <form className="space-y-4 mt-4">
-                                      <div className="space-y-2">
-                                        <label htmlFor="patient" className="text-sm font-medium">Patient</label>
-                                        <select id="patient" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                          <option value="">Sélectionner un patient</option>
-                                          <option value="Marie Dupont">Marie Dupont</option>
-                                          <option value="Jean Lefebvre">Jean Lefebvre</option>
-                                          <option value="Lucie Martin">Lucie Martin</option>
-                                          <option value="Thomas Bernard">Thomas Bernard</option>
-                                        </select>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <label htmlFor="purpose" className="text-sm font-medium">Motif</label>
-                                        <select id="purpose" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                          <option value="">Sélectionner un motif</option>
-                                          <option value="Consultation générale">Consultation générale</option>
-                                          <option value="Suivi">Suivi</option>
-                                          <option value="Urgence">Urgence</option>
-                                          <option value="Vaccination">Vaccination</option>
-                                          <option value="Renouvellement ordonnance">Renouvellement ordonnance</option>
-                                        </select>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <label htmlFor="note" className="text-sm font-medium">Note</label>
-                                        <textarea 
-                                          id="note" 
-                                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
-                                          rows={3}
-                                          placeholder="Ajouter une note (optionnel)"
-                                        />
-                                      </div>
-                                      <div className="flex justify-end gap-2 pt-4">
-                                        <Button variant="outline">Annuler</Button>
-                                        <Button className="bg-[#0069D9]">Enregistrer</Button>
-                                      </div>
-                                    </form>
+                              {appointment ? (
+                                <div 
+                                  className="flex-1 ml-4 p-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
+                                  onClick={() => handleAppointmentClick(appointment)}
+                                >
+                                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                      <h4 className="font-medium">{appointment.patient}</h4>
+                                      <p className="text-sm text-gray-500">{appointment.purpose}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-2 md:mt-0">
+                                      <span className="text-xs text-gray-500">{appointment.duration} min</span>
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                                        {appointment.status}
+                                      </span>
+                                    </div>
                                   </div>
-                                </DrawerContent>
-                              </Drawer>
+                                </div>
+                              ) : (
+                                <div className="flex-1 ml-4 p-2 border border-dashed border-gray-200 rounded-md flex items-center justify-center bg-white">
+                                  <Drawer>
+                                    <DrawerTrigger asChild>
+                                      <Button variant="ghost" className="text-sm text-gray-400 hover:text-gray-700">
+                                        <Plus className="h-3 w-3 mr-1" /> Disponible
+                                      </Button>
+                                    </DrawerTrigger>
+                                    <DrawerContent>
+                                      <div className="max-w-md mx-auto py-4 px-6">
+                                        <DrawerHeader>
+                                          <DrawerTitle>Ajouter un rendez-vous à {time}</DrawerTitle>
+                                        </DrawerHeader>
+                                        <form className="space-y-4 mt-4">
+                                          <div className="space-y-2">
+                                            <label htmlFor="patient" className="text-sm font-medium">Patient</label>
+                                            <select id="patient" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                              <option value="">Sélectionner un patient</option>
+                                              <option value="Marie Dupont">Marie Dupont</option>
+                                              <option value="Jean Lefebvre">Jean Lefebvre</option>
+                                              <option value="Lucie Martin">Lucie Martin</option>
+                                              <option value="Thomas Bernard">Thomas Bernard</option>
+                                            </select>
+                                          </div>
+                                          <div className="space-y-2">
+                                            <label htmlFor="purpose" className="text-sm font-medium">Motif</label>
+                                            <select id="purpose" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                              <option value="">Sélectionner un motif</option>
+                                              <option value="Consultation générale">Consultation générale</option>
+                                              <option value="Suivi">Suivi</option>
+                                              <option value="Urgence">Urgence</option>
+                                              <option value="Vaccination">Vaccination</option>
+                                              <option value="Renouvellement ordonnance">Renouvellement ordonnance</option>
+                                            </select>
+                                          </div>
+                                          <div className="space-y-2">
+                                            <label htmlFor="note" className="text-sm font-medium">Note</label>
+                                            <textarea 
+                                              id="note" 
+                                              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
+                                              rows={3}
+                                              placeholder="Ajouter une note (optionnel)"
+                                            />
+                                          </div>
+                                          <div className="flex justify-end gap-2 pt-4">
+                                            <Button variant="outline">Annuler</Button>
+                                            <Button className="bg-[#0069D9]">Enregistrer</Button>
+                                          </div>
+                                        </form>
+                                      </div>
+                                    </DrawerContent>
+                                  </Drawer>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="week" className="m-0">
-                <div className="overflow-x-auto">
-                  <Card>
-                    <CardHeader className="bg-gray-50 border-b px-3 py-2">
-                      <div className="grid grid-cols-7 gap-1">
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {/* Grid view */}
+                    {displayMode === "grid" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
+                        {filteredAppointments.map((appointment) => (
+                          <Card 
+                            key={appointment.id} 
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => handleAppointmentClick(appointment)}
+                          >
+                            <CardHeader className={`pb-2 ${getStatusColor(appointment.status)}`}>
+                              <div className="flex justify-between items-center">
+                                <h3 className="font-bold">{appointment.time}</h3>
+                                <Badge variant="outline">
+                                  {appointment.status}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="pt-2">
+                              <p className="font-medium">{appointment.patient}</p>
+                              <p className="text-sm text-gray-500">{appointment.purpose}</p>
+                              <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                                <span>{appointment.duration} min</span>
+                                {appointment.recurring && (
+                                  <Badge variant="outline" className="ml-2">Récurrent</Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        
+                        <Drawer>
+                          <DrawerTrigger asChild>
+                            <Card className="border-dashed cursor-pointer flex items-center justify-center h-32 hover:bg-gray-50">
+                              <div className="text-center text-gray-400">
+                                <Plus className="h-6 w-6 mx-auto mb-2" />
+                                <p>Nouveau rendez-vous</p>
+                              </div>
+                            </Card>
+                          </DrawerTrigger>
+                          <DrawerContent>
+                            <div className="max-w-md mx-auto py-4 px-6">
+                              <DrawerHeader>
+                                <DrawerTitle>Ajouter un rendez-vous</DrawerTitle>
+                              </DrawerHeader>
+                              <form className="space-y-4 mt-4">
+                                <div className="space-y-2">
+                                  <label htmlFor="patient" className="text-sm font-medium">Patient</label>
+                                  <select id="patient" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                    <option value="">Sélectionner un patient</option>
+                                    <option value="Marie Dupont">Marie Dupont</option>
+                                    <option value="Jean Lefebvre">Jean Lefebvre</option>
+                                  </select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <label htmlFor="time" className="text-sm font-medium">Heure</label>
+                                    <select id="time" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                      {timeSlots.map((time) => (
+                                        <option key={time} value={time}>{time}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <label htmlFor="duration" className="text-sm font-medium">Durée</label>
+                                    <select id="duration" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                      <option value="15">15 min</option>
+                                      <option value="30" selected>30 min</option>
+                                      <option value="45">45 min</option>
+                                      <option value="60">1 heure</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="flex justify-end gap-2 pt-4">
+                                  <Button variant="outline">Annuler</Button>
+                                  <Button className="bg-[#0069D9]">Enregistrer</Button>
+                                </div>
+                              </form>
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
+                      </div>
+                    )}
+                  </>
+                )}
+                
+                {/* Week view */}
+                {view === "week" && (
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[800px]">
+                      <div className="grid grid-cols-7 gap-1 p-2 bg-gray-50 border-b">
                         {weekDays.map((day, index) => (
                           <div key={index} className="text-center">
                             <div className="font-medium">{format(day, "EEE", { locale: fr })}</div>
@@ -610,49 +687,137 @@ const Appointments = () => {
                           </div>
                         ))}
                       </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      {timeSlots.map((time) => (
-                        <div key={time} className="grid grid-cols-7 border-b last:border-0">
-                          {weekDays.map((day, dayIndex) => {
-                            const appointment = appointments.find(
-                              app => app.time === time && isSameDay(day, date)
-                            );
-                            return (
-                              <div 
-                                key={dayIndex}
-                                className={`border-r last:border-r-0 min-h-[60px] ${dayIndex === 0 ? "pl-16 relative" : "p-1"} ${appointment ? "bg-gray-50" : ""}`}
-                              >
-                                {dayIndex === 0 && (
-                                  <div className="absolute left-2 top-1/2 -translate-y-1/2 font-medium text-gray-500 text-xs">
-                                    {time}
-                                  </div>
-                                )}
-                                
-                                {appointment ? (
-                                  <div 
-                                    className="h-full p-1 text-xs bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 cursor-pointer transition-colors"
-                                    onClick={() => handleAppointmentClick(appointment)}
-                                  >
-                                    <div className="font-medium truncate">{appointment.patient}</div>
-                                    <div className="truncate text-gray-500">{appointment.purpose}</div>
-                                  </div>
-                                ) : (
-                                  <div className="h-full w-full"></div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
+                      
+                      <div className="divide-y">
+                        {timeSlots.map((time) => (
+                          <div key={time} className="grid grid-cols-7 border-b last:border-0">
+                            {weekDays.map((day, dayIndex) => {
+                              const appointment = appointments.find(
+                                app => app.time === time && isSameDay(day, date)
+                              );
+                              return (
+                                <div 
+                                  key={dayIndex}
+                                  className={`border-r last:border-r-0 min-h-[60px] ${dayIndex === 0 ? "pl-16 relative" : "p-1"} ${appointment ? "bg-gray-50" : ""}`}
+                                >
+                                  {dayIndex === 0 && (
+                                    <div className="absolute left-2 top-1/2 -translate-y-1/2 font-medium text-gray-500 text-xs">
+                                      {time}
+                                    </div>
+                                  )}
+                                  
+                                  {appointment ? (
+                                    <div 
+                                      className="h-full p-1 text-xs bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 cursor-pointer transition-colors"
+                                      onClick={() => handleAppointmentClick(appointment)}
+                                    >
+                                      <div className="font-medium truncate">{appointment.patient}</div>
+                                      <div className="truncate text-gray-500">{appointment.purpose}</div>
+                                    </div>
+                                  ) : (
+                                    <div className="h-full w-full"></div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+      
+      {/* Mobile Filter Drawer */}
+      <Drawer open={showFilterDrawer} onOpenChange={setShowFilterDrawer}>
+        <DrawerContent>
+          <div className="max-w-md mx-auto py-4 px-4">
+            <DrawerHeader>
+              <DrawerTitle>Filtres & Calendrier</DrawerTitle>
+            </DrawerHeader>
+            <div className="space-y-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 flex justify-center">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(newDate) => newDate && setDate(newDate)}
+                    className="mx-auto border rounded-md pointer-events-auto"
+                  />
+                  <div className="flex justify-between items-center mt-4 w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => {
+                        goToToday();
+                        setShowFilterDrawer(false);
+                      }}
+                    >
+                      Aujourd'hui
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Filtres</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Statut</label>
+                    <select 
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      {statusOptions.map(status => (
+                        <option key={status} value={status}>{status}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Motif</label>
+                    <select 
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={purposeFilter}
+                      onChange={(e) => setStatusPurpose(e.target.value)}
+                    >
+                      {purposeOptions.map(purpose => (
+                        <option key={purpose} value={purpose}>{purpose}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button className="w-full" variant="outline" onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("Tous");
+                    setStatusPurpose("Tous");
+                  }}>
+                    Réinitialiser
+                  </Button>
+                  <Button className="w-full bg-[#0069D9]" onClick={() => {
+                    handleSendReminders();
+                    setShowFilterDrawer(false);
+                  }}>
+                    <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
+                  </Button>
+                  <Button className="w-full" onClick={() => setShowFilterDrawer(false)}>
+                    Fermer
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* Appointment Detail Drawer */}
       <Drawer open={showDetailDrawer} onOpenChange={setShowDetailDrawer}>
@@ -708,7 +873,7 @@ const Appointments = () => {
                     <p className="font-medium">{selectedAppointment.recurring ? "Oui" : "Non"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Derni��re visite</p>
+                    <p className="text-sm text-gray-500">Dernière visite</p>
                     <p className="font-medium">{selectedAppointment.lastVisit}</p>
                   </div>
                 </div>
