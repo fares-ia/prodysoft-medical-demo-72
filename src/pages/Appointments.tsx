@@ -283,11 +283,11 @@ const Appointments = () => {
             <Drawer>
               <DrawerTrigger asChild>
                 <Button className="bg-[#0069D9]">
-                  <Plus className="mr-2 h-4 w-4" /> Nouveau 2
+                  <Plus className="mr-2 h-4 w-4" /> Nouveau
                 </Button>
               </DrawerTrigger>
               <DrawerContent>
-                <div className="max-w-md mx-auto py-4 px-6">
+                <div className="max-w-md mx-auto px-6">
                   <DrawerHeader>
                     <DrawerTitle>Ajouter un rendez-vous</DrawerTitle>
                   </DrawerHeader>
