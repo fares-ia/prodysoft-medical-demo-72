@@ -328,8 +328,8 @@ const Appointments = () => {
                         <CardHeader className="p-3">
                           <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-3 flex justify-center">
-                          <div className="w-full max-w-[280px]">
+                        <CardContent className="p-3 flex justify-center relative">
+                          <div className="w-full max-w-[280px] relative z-10">
                             <Calendar
                               mode="single"
                               selected={date}
@@ -407,8 +407,8 @@ const Appointments = () => {
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                 </CardHeader>
-                <CardContent className="px-3 pb-4 flex justify-center">
-                  <div className="w-full max-w-[280px]">
+                <CardContent className="px-3 pb-4 flex justify-center relative">
+                  <div className="w-full max-w-[280px] relative z-10">
                     <Calendar
                       mode="single"
                       selected={date}
