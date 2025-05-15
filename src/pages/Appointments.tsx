@@ -1,12 +1,11 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { 
   Plus, Clock, Printer, Download, Filter, Search, CalendarDays, 
-  CalendarClock, ArrowLeft, ArrowRight, ChevronDown, List, Grid
+  Calendar as CalendarIcon, ArrowLeft, ArrowRight, ChevronDown, List, Grid
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { addDays, format, isSameDay, subDays, startOfWeek, endOfWeek } from "date-fns";
@@ -462,22 +461,16 @@ const Appointments = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <TabsList>
-                      <TabsTrigger 
-                        value="day" 
-                        onClick={() => setView("day")}
-                        className={view === "day" ? "bg-[#0069D9] text-white" : ""}
-                      >
-                        <Calendar className="h-4 w-4 mr-1" /> Jour
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="week" 
-                        onClick={() => setView("week")}
-                        className={view === "week" ? "bg-[#0069D9] text-white" : ""}
-                      >
-                        <CalendarDays className="h-4 w-4 mr-1" /> Semaine
-                      </TabsTrigger>
-                    </TabsList>
+                    <Tabs value={view} onValueChange={(v) => setView(v as "day" | "week")}>
+                      <TabsList>
+                        <TabsTrigger value="day">
+                          <CalendarIcon className="h-4 w-4 mr-1" /> Jour
+                        </TabsTrigger>
+                        <TabsTrigger value="week">
+                          <CalendarDays className="h-4 w-4 mr-1" /> Semaine
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
                   </div>
                 </div>
               </CardContent>
