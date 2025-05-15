@@ -1,10 +1,11 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { 
-  Plus, Clock, Printer, Download, Filter, Search, CalendarDays, 
+  Plus, Clock, Printer, Download, Filter, Search,
   Calendar as CalendarIcon, ArrowLeft, ArrowRight, ChevronDown, List, Grid
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -17,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 // Mock data for appointments with added fields for enhanced functionality
 const mockAppointments = [
@@ -202,6 +204,11 @@ const Appointments = () => {
     });
   };
 
+  // Date formatter for display
+  const formatDate = (date: Date): string => {
+    return format(date, "dd MMMM yyyy", { locale: fr });
+  };
+
   return (
     <DashboardLayout>
       {/* Header section with title and action buttons */}
@@ -244,6 +251,34 @@ const Appointments = () => {
             <Button variant="outline" size="icon" onClick={handleExport}>
               <Download className="h-4 w-4" />
             </Button>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, "dd/MM/yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => newDate && setDate(newDate)}
+                  initialFocus
+                  className="border rounded-md pointer-events-auto"
+                />
+                <div className="p-3 border-t">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={goToToday}
+                  >
+                    Aujourd'hui
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             
             <Drawer>
               <DrawerTrigger asChild>
@@ -343,34 +378,9 @@ const Appointments = () => {
         
         {/* Main content area */}
         <div className="grid grid-cols-12 gap-6">
-          {/* Sidebar - Filters & Calendar */}
+          {/* Sidebar - Filters only (calendar removed) */}
           <div className={`${isMobile ? "hidden" : "col-span-12 md:col-span-3"}`}>
-            <div className="space-y-6">
-              {/* Calendar component */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
-                </CardHeader>
-                <CardContent className="px-3 pb-4">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(newDate) => newDate && setDate(newDate)}
-                    className="mx-auto border rounded-md pointer-events-auto"
-                  />
-                  <div className="flex justify-between items-center mt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={goToToday}
-                    >
-                      Aujourd'hui
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
+            <div className="space-y-6">              
               {/* Filters */}
               <Card>
                 <CardHeader className="pb-2">
@@ -467,7 +477,7 @@ const Appointments = () => {
                           <CalendarIcon className="h-4 w-4 mr-1" /> Jour
                         </TabsTrigger>
                         <TabsTrigger value="week">
-                          <CalendarDays className="h-4 w-4 mr-1" /> Semaine
+                          <CalendarIcon className="h-4 w-4 mr-1" /> Semaine
                         </TabsTrigger>
                       </TabsList>
                     </Tabs>
@@ -730,33 +740,40 @@ const Appointments = () => {
         <DrawerContent>
           <div className="max-w-md mx-auto py-4 px-4">
             <DrawerHeader>
-              <DrawerTitle>Filtres & Calendrier</DrawerTitle>
+              <DrawerTitle>Filtres</DrawerTitle>
             </DrawerHeader>
             <div className="space-y-4">
-              {/* Calendar card in mobile drawer */}
+              {/* Date Picker in mobile drawer */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
+                  <CardTitle className="text-lg font-medium">Date</CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 flex justify-center">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(newDate) => newDate && setDate(newDate)}
-                    className="mx-auto border rounded-md pointer-events-auto"
-                  />
-                  <div className="flex justify-between items-center mt-4 w-full">
+                <CardContent className="flex flex-col items-center space-y-4">
+                  <div className="flex gap-2 w-full">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className="w-full"
-                      onClick={() => {
-                        goToToday();
-                        setShowFilterDrawer(false);
-                      }}
+                      onClick={goToToday}
                     >
                       Aujourd'hui
                     </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full">
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          Choisir une date
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="center">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={(newDate) => newDate && setDate(newDate)}
+                          className="border rounded-md pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </CardContent>
               </Card>
