@@ -283,7 +283,7 @@ const Appointments = () => {
             <Drawer>
               <DrawerTrigger asChild>
                 <Button className="bg-[#0069D9]">
-                  <Plus className="mr-2 h-4 w-4" /> Nouveau
+                  <Plus className="mr-2 h-4 w-4" /> Nouveau 2
                 </Button>
               </DrawerTrigger>
               <DrawerContent>
