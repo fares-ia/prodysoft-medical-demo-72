@@ -418,7 +418,7 @@ const Appointments = () => {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button className="w-full bg-[#0069D9]" onClick={handleSendReminders}>
-                    <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
+                    <CalendarIcon className="mr-2 h-4 w-4" /> Envoyer rappels
                   </Button>
                 </CardContent>
               </Card>
@@ -733,7 +733,8 @@ const Appointments = () => {
               <DrawerTitle>Filtres & Calendrier</DrawerTitle>
             </DrawerHeader>
             <div className="space-y-4">
-              <Card className="overflow-hidden">
+              {/* Calendar card in mobile drawer */}
+              <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                 </CardHeader>
@@ -760,6 +761,7 @@ const Appointments = () => {
                 </CardContent>
               </Card>
 
+              {/* Filters card in mobile drawer */}
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-medium">Filtres</CardTitle>
@@ -800,7 +802,7 @@ const Appointments = () => {
                     handleSendReminders();
                     setShowFilterDrawer(false);
                   }}>
-                    <CalendarClock className="mr-2 h-4 w-4" /> Envoyer rappels
+                    <CalendarIcon className="mr-2 h-4 w-4" /> Envoyer rappels
                   </Button>
                   <Button className="w-full" onClick={() => setShowFilterDrawer(false)}>
                     Fermer
