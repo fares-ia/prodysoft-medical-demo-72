@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -235,12 +234,14 @@ const Appointments = () => {
                     <div className="space-y-2">
                       <label htmlFor="date" className="text-sm font-medium">Date</label>
                       <div className="flex justify-center">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={(newDate) => newDate && setDate(newDate)}
-                          className="rounded-md border shadow"
-                        />
+                        <div className="w-full max-w-[300px]">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(newDate) => newDate && setDate(newDate)}
+                            className="border rounded-md"
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -327,16 +328,14 @@ const Appointments = () => {
                         <CardHeader className="p-3">
                           <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0 flex justify-center">
-                          <div className="w-full max-w-[320px]">
-                            <AspectRatio ratio={4/3} className="bg-white">
-                              <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={(newDate) => newDate && setDate(newDate)}
-                                className="mx-auto w-full"
-                              />
-                            </AspectRatio>
+                        <CardContent className="p-3 flex justify-center">
+                          <div className="w-full max-w-[280px]">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(newDate) => newDate && setDate(newDate)}
+                              className="mx-auto border rounded-md"
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -408,13 +407,15 @@ const Appointments = () => {
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">Calendrier</CardTitle>
                 </CardHeader>
-                <CardContent className="px-2 pb-4">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(newDate) => newDate && setDate(newDate)}
-                    className="rounded-md border mx-auto"
-                  />
+                <CardContent className="px-3 pb-4 flex justify-center">
+                  <div className="w-full max-w-[280px]">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={(newDate) => newDate && setDate(newDate)}
+                      className="mx-auto border rounded-md"
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
@@ -707,7 +708,7 @@ const Appointments = () => {
                     <p className="font-medium">{selectedAppointment.recurring ? "Oui" : "Non"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Dernière visite</p>
+                    <p className="text-sm text-gray-500">Derni��re visite</p>
                     <p className="font-medium">{selectedAppointment.lastVisit}</p>
                   </div>
                 </div>
