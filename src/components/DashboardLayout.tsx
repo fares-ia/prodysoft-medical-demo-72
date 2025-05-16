@@ -9,7 +9,13 @@ import {
   CreditCard, 
   Settings, 
   LogOut, 
-  Menu
+  Menu, 
+  UserPlus,
+  Package,
+  Hospital,
+  Briefcase,
+  Ambulance,
+  Folder
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -94,7 +100,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           } lg:translate-x-0 fixed lg:static h-[calc(100vh-4rem)] z-10`}
         >
           <div className="p-4 flex-1 overflow-auto">
-            <nav className="space-y-2">
+            <nav className="space-y-1">
+              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-2">
+                Principal
+              </p>
               <SidebarItem
                 icon={Home}
                 text="Tableau de bord"
@@ -119,12 +128,64 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 to="/consultations"
                 active={location.pathname.startsWith("/consultations")}
               />
+              
+              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">
+                Administration
+              </p>
+              <SidebarItem
+                icon={UserPlus}
+                text="Utilisateurs"
+                to="/users"
+                active={location.pathname.startsWith("/users")}
+              />
+              <SidebarItem
+                icon={Hospital}
+                text="Blocs Opératoires"
+                to="/operating-rooms"
+                active={location.pathname.startsWith("/operating-rooms")}
+              />
+              <SidebarItem
+                icon={Briefcase}
+                text="Services"
+                to="/services"
+                active={location.pathname.startsWith("/services")}
+              />
+              
+              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">
+                Logistique
+              </p>
+              <SidebarItem
+                icon={Folder}
+                text="Fournisseurs"
+                to="/suppliers"
+                active={location.pathname.startsWith("/suppliers")}
+              />
+              <SidebarItem
+                icon={Package}
+                text="Commandes"
+                to="/orders"
+                active={location.pathname.startsWith("/orders")}
+              />
+              <SidebarItem
+                icon={Ambulance}
+                text="Flotte"
+                to="/fleet"
+                active={location.pathname.startsWith("/fleet")}
+              />
+              
+              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">
+                Finance
+              </p>
               <SidebarItem
                 icon={CreditCard}
                 text="Facturation"
                 to="/billing"
                 active={location.pathname.startsWith("/billing")}
               />
+              
+              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">
+                Système
+              </p>
               <SidebarItem
                 icon={Settings}
                 text="Paramètres"

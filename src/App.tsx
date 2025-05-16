@@ -12,6 +12,12 @@ import Consultations from "./pages/Consultations";
 import Billing from "./pages/Billing";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Users from "./pages/Users";
+import Suppliers from "./pages/Suppliers";
+import Orders from "./pages/Orders";
+import OperatingRooms from "./pages/OperatingRooms";
+import Services from "./pages/Services";
+import Fleet from "./pages/Fleet";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +35,12 @@ const App = () => (
           <Route path="/consultations" element={<Consultations />} />
           <Route path="/billing" element={<Billing />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/suppliers" element={<Suppliers />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/operating-rooms" element={<OperatingRooms />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/fleet" element={<Fleet />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
