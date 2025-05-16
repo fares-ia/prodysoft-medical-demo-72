@@ -1,231 +1,151 @@
 
-import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, CheckCircle, Shield, HeartPulse, Clock, Users } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, HeartPulse, Clock, Users, Stethoscope, Building, FileText } from "lucide-react";
 
 const Index = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email === "admin@prodysoft.com" && password === "admin123") {
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur le portail médical",
-      });
-      setIsLoggedIn(true);
-    } else {
-      toast({
-        title: "Échec de la connexion",
-        description: "Email ou mot de passe incorrect",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoggedIn) {
-    return <Navigate to="/dashboard" />;
-  }
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <header className="bg-white shadow-sm py-4">
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm py-4 fixed w-full z-10">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center">
             <img src="/placeholder.svg" alt="Prodysoft Medical" width={40} height={40} className="text-blue-600" />
             <h1 className="text-xl font-bold text-[#0069D9] ml-2">Prodysoft Medical</h1>
           </div>
           <div>
-            <Button variant="ghost" className="text-gray-600 mr-2">À propos</Button>
-            <Button variant="ghost" className="text-gray-600 mr-2">Fonctionnalités</Button>
-            <Button variant="ghost" className="text-gray-600 mr-2">Contact</Button>
-            <Button className="bg-[#0069D9] hover:bg-blue-700">Démo</Button>
+            <Button 
+              className="bg-[#0069D9] hover:bg-blue-700" 
+              size="lg"
+              onClick={() => navigate('/login')}
+            >
+              Découvrir <ArrowRight className="ml-1 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-          <div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">La solution complète pour la gestion de votre clinique</h2>
-            <p className="text-lg text-gray-600 mb-6">
-              Prodysoft Medical offre une plateforme intégrée qui optimise tous les aspects de la gestion clinique, 
-              de la prise de rendez-vous à la gestion des ressources hospitalières.
+      <main>
+        {/* Hero Section with Full Screen Image */}
+        <div className="relative h-screen">
+          <img 
+            src="https://images.unsplash.com/photo-1589279003513-467d320f47eb?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+            alt="Professionnel de santé utilisant un ordinateur" 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent flex items-center">
+            <div className="container mx-auto px-4">
+              <div className="max-w-2xl text-white">
+                <h2 className="text-5xl font-bold mb-6 animate-fade-in">La solution de référence pour la gestion hospitalière</h2>
+                <p className="text-xl mb-8 animate-fade-in">
+                  Prodysoft Medical transforme la façon dont les établissements de santé gèrent leurs opérations quotidiennes, 
+                  offrant une plateforme complète et intuitive pour tous vos besoins.
+                </p>
+                <Button 
+                  size="lg" 
+                  className="bg-white text-[#0069D9] hover:bg-blue-50 animate-fade-in"
+                  onClick={() => navigate('/login')}
+                >
+                  Découvrir <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h3 className="text-3xl font-bold text-gray-800 mb-4">Une solution complète pour votre établissement de santé</h3>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Notre plateforme offre tous les outils nécessaires pour optimiser vos opérations quotidiennes et améliorer la qualité des soins.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <Users className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Gestion des patients</h4>
+                <p className="text-gray-600">
+                  Dossiers médicaux électroniques complets, historiques des consultations et suivi personnalisé de chaque patient.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <Stethoscope className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Blocs opératoires</h4>
+                <h4 className="text-xl font-semibold mb-3">Blocs opératoires</h4>
+                <p className="text-gray-600">
+                  Planification avancée des interventions chirurgicales et gestion optimisée des salles d'opération.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <Building className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Gestion par services</h4>
+                <p className="text-gray-600">
+                  Organisation par unités spécialisées pour une coordination optimale entre les différents départements de votre établissement.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <HeartPulse className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Suivi médical avancé</h4>
+                <p className="text-gray-600">
+                  Outils de surveillance et d'analyse pour un suivi précis de l'état de santé des patients.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <FileText className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Facturation intelligente</h4>
+                <p className="text-gray-600">
+                  Système de facturation automatisé avec suivi des paiements et génération de rapports financiers.
+                </p>
+              </div>
+              
+              <div className="p-6 bg-blue-50 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 rounded-full bg-blue-100 w-fit mb-4">
+                  <Clock className="h-6 w-6 text-[#0069D9]" />
+                </div>
+                <h4 className="text-xl font-semibold mb-3">Planification optimisée</h4>
+                <p className="text-gray-600">
+                  Gestion intelligente des rendez-vous et des ressources pour maximiser l'efficacité opérationnelle.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="py-16 bg-[#0069D9] text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h3 className="text-3xl font-bold mb-6">Prêt à transformer votre établissement de santé ?</h3>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Rejoignez plus de 300 établissements qui font confiance à Prodysoft Medical pour optimiser leur gestion quotidienne.
             </p>
-            <div className="flex flex-wrap gap-4 mb-8">
-              <Button size="lg" className="bg-[#0069D9] hover:bg-blue-700">
-                Commencer <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline">
-                Demander une démo
-              </Button>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-              <span>Utilisé par plus de 300 établissements de santé</span>
-            </div>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-white border-white hover:bg-white/20"
+              onClick={() => navigate('/login')}
+            >
+              Découvrir dès maintenant <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
-          <div className="flex justify-center">
-            <img 
-              src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" 
-              alt="Gestion de clinique" 
-              className="rounded-lg shadow-xl max-w-full h-auto"
-            />
-          </div>
-        </div>
-
-        <div className="text-center mb-16">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">Une solution complète pour votre établissement de santé</h3>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Notre plateforme offre tous les outils nécessaires pour optimiser vos opérations quotidiennes et améliorer la qualité des soins.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          <Card className="border-t-4 border-t-[#0069D9]">
-            <CardHeader>
-              <div className="p-3 rounded-full bg-blue-100 w-fit">
-                <Users className="h-6 w-6 text-[#0069D9]" />
-              </div>
-              <CardTitle className="text-xl mt-4">Gestion des patients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                Gérez efficacement les dossiers patients, les rendez-vous et les suivis médicaux pour offrir des soins personnalisés.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-t-4 border-t-[#0069D9]">
-            <CardHeader>
-              <div className="p-3 rounded-full bg-blue-100 w-fit">
-                <HeartPulse className="h-6 w-6 text-[#0069D9]" />
-              </div>
-              <CardTitle className="text-xl mt-4">Suivi médical avancé</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                Assurez un suivi précis de l'état de santé des patients avec nos outils de surveillance et d'analyse.
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="border-t-4 border-t-[#0069D9]">
-            <CardHeader>
-              <div className="p-3 rounded-full bg-blue-100 w-fit">
-                <Clock className="h-6 w-6 text-[#0069D9]" />
-              </div>
-              <CardTitle className="text-xl mt-4">Planification optimisée</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                Organisez efficacement les rendez-vous, les opérations et l'utilisation des blocs opératoires.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="bg-gray-50 rounded-2xl p-8 mb-20">
-          <Tabs defaultValue="connexion" className="max-w-md mx-auto">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="connexion">Connexion</TabsTrigger>
-              <TabsTrigger value="demo">Demander une démo</TabsTrigger>
-            </TabsList>
-            <TabsContent value="connexion">
-              <Card>
-                <CardHeader className="text-center pb-6">
-                  <div className="flex justify-center mb-4">
-                    <Shield className="h-12 w-12 text-[#0069D9]" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-[#0069D9]">Portail Médical</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="exemple@prodysoft.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Mot de passe</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <label className="flex items-center">
-                        <input type="checkbox" className="mr-2" />
-                        <span>Se souvenir de moi</span>
-                      </label>
-                      <a href="#" className="text-[#0069D9] hover:underline">Mot de passe oublié?</a>
-                    </div>
-                    <Button type="submit" className="w-full bg-[#0069D9] hover:bg-blue-700">
-                      Se connecter
-                    </Button>
-                  </form>
-                  <div className="text-center mt-4 text-sm text-gray-600">
-                    <p>Identifiants de démonstration:</p>
-                    <p>Email: admin@prodysoft.com</p>
-                    <p>Mot de passe: admin123</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="demo">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">Demandez une démonstration</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="prenom">Prénom</Label>
-                        <Input id="prenom" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="nom">Nom</Label>
-                        <Input id="nom" required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email-demo">Email professionnel</Label>
-                      <Input id="email-demo" type="email" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="etablissement">Établissement</Label>
-                      <Input id="etablissement" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="telephone">Téléphone</Label>
-                      <Input id="telephone" type="tel" required />
-                    </div>
-                    <Button type="submit" className="w-full bg-[#0069D9] hover:bg-blue-700">
-                      Demander une démo
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
         </div>
       </main>
       
