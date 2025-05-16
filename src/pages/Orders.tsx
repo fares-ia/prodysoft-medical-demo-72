@@ -1,10 +1,10 @@
 
 import React, { useState } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,15 +16,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -32,191 +35,229 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Package, Plus, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import DashboardLayout from "@/components/DashboardLayout";
-
-// Define types
-type Order = {
-  id: string;
-  reference: string;
-  supplier: string;
-  category: string;
-  date: string;
-  total: string;
-  status: "pending" | "delivered" | "canceled";
-};
+import { Package, Plus, Search, Filter } from "lucide-react";
 
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "1",
-      reference: "CMD-2023-001",
-      supplier: "MediSupplies",
-      category: "Médicaments",
-      date: "15/04/2023",
-      total: "2,560.00 €",
-      status: "delivered",
-    },
-    {
-      id: "2",
-      reference: "CMD-2023-002",
-      supplier: "LabEquip",
-      category: "Équipement",
-      date: "22/04/2023",
-      total: "12,750.00 €",
-      status: "pending",
-    },
-    {
-      id: "3",
-      reference: "CMD-2023-003",
-      supplier: "CleanMed",
-      category: "Produits d'entretien",
-      date: "28/04/2023",
-      total: "890.00 €",
-      status: "delivered",
-    },
-    {
-      id: "4",
-      reference: "CMD-2023-004",
-      supplier: "MediSupplies",
-      category: "Consommables",
-      date: "03/05/2023",
-      total: "3,210.00 €",
-      status: "canceled",
-    },
-    {
-      id: "5",
-      reference: "CMD-2023-005",
-      supplier: "PharmaDirect",
-      category: "Médicaments",
-      date: "10/05/2023",
-      total: "4,750.00 €",
-      status: "pending",
-    },
-  ]);
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [newOrder, setNewOrder] = useState({
+    reference: "",
+    supplierName: "",
+    category: "Médicaments",
+    items: "",
+    totalAmount: "",
+    status: "En attente",
+  });
 
-  const handleAddOrder = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    
-    // Create new order with form data
-    const newOrder: Order = {
-      id: `${orders.length + 1}`,
-      reference: `CMD-2023-00${orders.length + 1}`,
-      supplier: formData.get("supplier") as string,
-      category: formData.get("category") as string,
-      date: new Date().toLocaleDateString("fr-FR"),
-      total: `${formData.get("total")} €`,
-      status: "pending",
-    };
+  // Demo data for orders
+  const ordersData = [
+    {
+      id: 1,
+      reference: "CMD-2025-001",
+      date: "12/05/2025",
+      supplierName: "PharmaPlus",
+      category: "Médicaments",
+      items: "Antibiotiques, Analgésiques",
+      totalAmount: "2,450.00 €",
+      status: "Livré",
+    },
+    {
+      id: 2,
+      reference: "CMD-2025-002",
+      date: "15/05/2025",
+      supplierName: "MedEquip",
+      category: "Matériel médical",
+      items: "Stéthoscopes, Tensiomètres",
+      totalAmount: "1,830.00 €",
+      status: "En cours",
+    },
+    {
+      id: 3,
+      reference: "CMD-2025-003",
+      date: "18/05/2025",
+      supplierName: "BioChem",
+      category: "Laboratoire",
+      items: "Réactifs, Tubes de prélèvement",
+      totalAmount: "3,120.00 €",
+      status: "En attente",
+    },
+    {
+      id: 4,
+      reference: "CMD-2025-004",
+      date: "20/05/2025",
+      supplierName: "CleanMed",
+      category: "Hygiène",
+      items: "Désinfectants, Gants, Masques",
+      totalAmount: "1,250.00 €",
+      status: "Livré",
+    },
+    {
+      id: 5,
+      reference: "CMD-2025-005",
+      date: "22/05/2025",
+      supplierName: "MedEquip",
+      category: "Matériel médical",
+      items: "Moniteur cardiaque, Pompe à perfusion",
+      totalAmount: "5,680.00 €",
+      status: "En cours",
+    },
+    {
+      id: 6,
+      reference: "CMD-2025-006",
+      date: "24/05/2025",
+      supplierName: "PharmaPlus",
+      category: "Médicaments",
+      items: "Antidépresseurs, Antihypertenseurs",
+      totalAmount: "2,890.00 €",
+      status: "En attente",
+    },
+  ];
 
-    setOrders([...orders, newOrder]);
-    setIsDialogOpen(false);
+  const handleOrderSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     toast({
       title: "Commande créée",
       description: `La commande ${newOrder.reference} a été créée avec succès.`,
     });
+    // Reset form (in a real app, would add to orders)
+    setNewOrder({
+      reference: "",
+      supplierName: "",
+      category: "Médicaments",
+      items: "",
+      totalAmount: "",
+      status: "En attente",
+    });
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = searchTerm === "" || 
+  const filteredOrders = ordersData.filter((order) => {
+    const matchesSearch =
       order.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.supplier.toLowerCase().includes(searchTerm.toLowerCase());
+      order.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.items.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const matchesCategory = categoryFilter === "all" || order.category === categoryFilter;
     
-    const matchesCategory = !filterCategory || order.category === filterCategory;
-    
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const categories = [...new Set(orders.map(order => order.category))];
-  const suppliers = [...new Set(orders.map(order => order.supplier))];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Livré":
+        return "bg-green-100 text-green-800";
+      case "En cours":
+        return "bg-blue-100 text-blue-800";
+      case "En attente":
+        return "bg-amber-100 text-amber-800";
+      case "Annulé":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Commandes</h1>
-            <p className="text-gray-500 mt-1">Gérez les commandes de fournitures et équipements</p>
+            <h1 className="text-3xl font-bold text-gray-900">Gestion des commandes</h1>
+            <p className="text-gray-500">Gérez vos commandes et suivez leur statut</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle commande
+              <Button className="bg-[#0069D9]">
+                <Plus className="mr-2 h-4 w-4" /> Nouvelle commande
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Créer une nouvelle commande</DialogTitle>
                 <DialogDescription>
-                  Remplissez les détails de la commande ci-dessous
+                  Remplissez les informations pour passer une nouvelle commande auprès d'un fournisseur.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAddOrder} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier">Fournisseur</Label>
-                    <Select name="supplier" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un fournisseur" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers.map((supplier, index) => (
-                          <SelectItem key={index} value={supplier}>
-                            {supplier}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Catégorie</Label>
-                    <Select name="category" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une catégorie" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category, index) => (
-                          <SelectItem key={index} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="items">Articles</Label>
-                  <div className="border rounded-md p-4 space-y-3">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      <Input placeholder="Nom de l'article" />
-                      <Input type="number" placeholder="Quantité" />
-                      <Input placeholder="Prix unitaire" />
+              <form onSubmit={handleOrderSubmit}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reference">Référence</Label>
+                      <Input
+                        id="reference"
+                        value={newOrder.reference}
+                        onChange={(e) => setNewOrder({ ...newOrder, reference: e.target.value })}
+                        required
+                      />
                     </div>
-                    <Button type="button" variant="outline" className="w-full">
-                      + Ajouter un article
-                    </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Catégorie</Label>
+                      <Select
+                        value={newOrder.category}
+                        onValueChange={(value) => setNewOrder({ ...newOrder, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une catégorie" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Médicaments">Médicaments</SelectItem>
+                          <SelectItem value="Matériel médical">Matériel médical</SelectItem>
+                          <SelectItem value="Laboratoire">Laboratoire</SelectItem>
+                          <SelectItem value="Hygiène">Hygiène</SelectItem>
+                          <SelectItem value="Bureautique">Bureautique</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Input id="notes" name="notes" placeholder="Notes supplémentaires" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total">Montant total (€)</Label>
-                  <Input id="total" name="total" type="text" placeholder="0.00" required />
+                  <div className="space-y-2">
+                    <Label htmlFor="supplierName">Fournisseur</Label>
+                    <Input
+                      id="supplierName"
+                      value={newOrder.supplierName}
+                      onChange={(e) => setNewOrder({ ...newOrder, supplierName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="items">Articles</Label>
+                    <Input
+                      id="items"
+                      value={newOrder.items}
+                      onChange={(e) => setNewOrder({ ...newOrder, items: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="totalAmount">Montant total</Label>
+                    <Input
+                      id="totalAmount"
+                      value={newOrder.totalAmount}
+                      onChange={(e) => setNewOrder({ ...newOrder, totalAmount: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Statut</Label>
+                    <Select
+                      value={newOrder.status}
+                      onValueChange={(value) => setNewOrder({ ...newOrder, status: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="En attente">En attente</SelectItem>
+                        <SelectItem value="En cours">En cours</SelectItem>
+                        <SelectItem value="Livré">Livré</SelectItem>
+                        <SelectItem value="Annulé">Annulé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Créer la commande</Button>
+                  <Button type="submit" className="bg-[#0069D9]">Créer la commande</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -225,101 +266,93 @@ const Orders = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Liste des commandes</CardTitle>
+            <CardTitle className="text-xl">Liste des commandes</CardTitle>
             <CardDescription>
-              {filteredOrders.length} commandes au total
+              Gérez et suivez toutes les commandes passées auprès de vos fournisseurs.
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row justify-between mb-4 space-y-2 md:space-y-0">
-              <div className="relative w-full md:w-72">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
-                  placeholder="Rechercher des commandes..."
+                  placeholder="Rechercher une commande..."
                   className="pl-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="w-full md:w-64">
-                <Select onValueChange={(val) => setFilterCategory(val === "all" ? undefined : val)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filtrer par catégorie" />
+              <div className="flex gap-2">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <span>Statut</span>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Toutes les catégories</SelectItem>
-                    {categories.map((category, index) => (
-                      <SelectItem key={index} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">Tous</SelectItem>
+                    <SelectItem value="En attente">En attente</SelectItem>
+                    <SelectItem value="En cours">En cours</SelectItem>
+                    <SelectItem value="Livré">Livré</SelectItem>
+                    <SelectItem value="Annulé">Annulé</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>Catégorie</span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes</SelectItem>
+                    <SelectItem value="Médicaments">Médicaments</SelectItem>
+                    <SelectItem value="Matériel médical">Matériel médical</SelectItem>
+                    <SelectItem value="Laboratoire">Laboratoire</SelectItem>
+                    <SelectItem value="Hygiène">Hygiène</SelectItem>
+                    <SelectItem value="Bureautique">Bureautique</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div className="border rounded-md overflow-hidden">
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Référence</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Fournisseur</TableHead>
                     <TableHead>Catégorie</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Articles</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.reference}</TableCell>
-                      <TableCell>{order.supplier}</TableCell>
-                      <TableCell>{order.category}</TableCell>
-                      <TableCell>{order.date}</TableCell>
-                      <TableCell>{order.total}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            order.status === "delivered"
-                              ? "bg-green-100 text-green-800"
-                              : order.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {order.status === "delivered"
-                            ? "Livrée"
-                            : order.status === "pending"
-                            ? "En attente"
-                            : "Annulée"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          Voir
-                        </Button>
+                  {filteredOrders.length > 0 ? (
+                    filteredOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.reference}</TableCell>
+                        <TableCell>{order.date}</TableCell>
+                        <TableCell>{order.supplierName}</TableCell>
+                        <TableCell>{order.category}</TableCell>
+                        <TableCell>{order.items}</TableCell>
+                        <TableCell>{order.totalAmount}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                        Aucune commande trouvée.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <div className="text-sm text-gray-500">
-              Affichage de {filteredOrders.length} sur {orders.length} commandes
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" disabled>
-                Précédent
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                Suivant
-              </Button>
-            </div>
-          </CardFooter>
         </Card>
       </div>
     </DashboardLayout>
