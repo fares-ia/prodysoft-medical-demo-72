@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Shield, LogIn } from "lucide-react";
+import { Shield, LogIn, Hospital } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -39,7 +39,7 @@ const Login = () => {
       <div className="flex-1 flex flex-col justify-center p-8 md:p-16">
         <div className="mb-8">
           <div className="flex items-center mb-6">
-            <img src="/placeholder.svg" alt="Prodysoft Medical" width={40} height={40} className="text-blue-600" />
+            <Hospital className="h-10 w-10 text-[#0069D9]" aria-label="Hospital icon" />
             <h1 className="text-2xl font-bold text-[#0069D9] ml-2">Prodysoft Medical</h1>
           </div>
           

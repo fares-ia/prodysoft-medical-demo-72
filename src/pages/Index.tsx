@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Shield, HeartPulse, Clock, Users, Stethoscope, Building, FileText } from "lucide-react";
+import { ArrowRight, CheckCircle, Shield, HeartPulse, Clock, Users, Stethoscope, Building, FileText, Hospital } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Index = () => {
       <header className="bg-white/80 backdrop-blur-sm shadow-sm py-4 fixed w-full z-10">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center">
-            <img src="/placeholder.svg" alt="Prodysoft Medical" width={40} height={40} className="text-blue-600" />
+            <Hospital className="h-10 w-10 text-[#0069D9]" aria-label="Hospital icon" />
             <h1 className="text-xl font-bold text-[#0069D9] ml-2">Prodysoft Medical</h1>
           </div>
           <div>
@@ -81,7 +81,6 @@ const Index = () => {
                   <Stethoscope className="h-6 w-6 text-[#0069D9]" />
                 </div>
                 <h4 className="text-xl font-semibold mb-3">Blocs opératoires</h4>
-                <h4 className="text-xl font-semibold mb-3">Blocs opératoires</h4>
                 <p className="text-gray-600">
                   Planification avancée des interventions chirurgicales et gestion optimisée des salles d'opération.
                 </p>
@@ -130,8 +129,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className="py-16 bg-[#0069D9] text-white">
+        {/* Call to Action - Changed background to white */}
+        <div className="py-16 bg-white text-gray-800">
           <div className="container mx-auto px-4 text-center">
             <h3 className="text-3xl font-bold mb-6">Prêt à transformer votre établissement de santé ?</h3>
             <p className="text-xl mb-8 max-w-2xl mx-auto">
@@ -139,8 +138,7 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              variant="outline" 
-              className="text-white border-white hover:bg-white/20"
+              className="bg-[#0069D9] hover:bg-blue-700 text-white"
               onClick={() => navigate('/login')}
             >
               Découvrir dès maintenant <ArrowRight className="ml-2 h-5 w-5" />
@@ -149,36 +147,36 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className="bg-gray-800 text-white py-12">
+      <footer className="bg-[#e5e7eb] text-gray-800 py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h4 className="text-lg font-bold mb-4">À propos</h4>
-              <p className="text-gray-300">
+              <p className="text-gray-600">
                 Prodysoft Medical développe des solutions innovantes pour la gestion des établissements de santé.
                 Notre mission est d'améliorer la qualité des soins à travers des outils numériques performants.
               </p>
             </div>
             <div>
               <h4 className="text-lg font-bold mb-4">Liens rapides</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white">Accueil</a></li>
-                <li><a href="#" className="hover:text-white">Fonctionnalités</a></li>
-                <li><a href="#" className="hover:text-white">Tarifs</a></li>
-                <li><a href="#" className="hover:text-white">Contact</a></li>
+              <ul className="space-y-2 text-gray-600">
+                <li><a href="#" className="hover:text-gray-900">Accueil</a></li>
+                <li><a href="#" className="hover:text-gray-900">Fonctionnalités</a></li>
+                <li><a href="#" className="hover:text-gray-900">Tarifs</a></li>
+                <li><a href="#" className="hover:text-gray-900">Contact</a></li>
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-bold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>contact@prodysoft.com</li>
-                <li>+33 1 23 45 67 89</li>
-                <li>123 Avenue des Cliniques</li>
-                <li>75001 Paris, France</li>
+              <ul className="space-y-2 text-gray-600">
+                <li>Email: contact@prodysoft.com</li>
+                <li>Tél France/WhatsApp: +33 7 71 68 59 90</li>
+                <li>Tél Algérie: +213 6 59 61 43 77</li>
+                <li>Adresses: Bejaia, Alger et Paris</li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 mt-8 border-t border-gray-700 text-center text-gray-400">
+          <div className="pt-8 mt-8 border-t border-gray-300 text-center text-gray-500">
             <p>© 2025 Prodysoft Medical. Tous droits réservés.</p>
           </div>
         </div>
